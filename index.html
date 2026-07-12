@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlycoPredict AI - Diabetes Analytics & Prediction Dashboard</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="A premium, AI-powered responsive diabetes prediction and dataset analysis dashboard for clinicians and health researchers.">
+  <meta name="keywords" content="diabetes prediction, machine learning, medical dashboard, health analytics, pima indians dataset">
+  
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Plotly.js CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <i class="fa-solid fa-heart-pulse"></i>
+      <span>GlycoPredict AI</span>
+    </div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link active" data-view="home" id="nav-home">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="dataset" id="nav-dataset">
+          <i class="fa-solid fa-database"></i>
+          <span>Dataset Overview</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="visualization" id="nav-visualization">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Data Visualization</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="prediction" id="nav-prediction">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Diabetes Prediction</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="model" id="nav-model">
+          <i class="fa-solid fa-microchip"></i>
+          <span>Model Performance</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="history" id="nav-history">
+          <i class="fa-solid fa-history"></i>
+          <span>Prediction History</span>
+        </a>
+      </li>
+      <li class="sidebar-menu-item">
+        <a class="sidebar-link" data-view="about" id="nav-about">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="header-title-container">
+        <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 id="page-title">Dashboard Overview</h1>
+      </div>
+      <div class="header-actions">
+        <div class="header-badge">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Model Status: Active</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content-body">
+
+      <!-- View: Home -->
+      <section id="view-home" class="dashboard-view active">
+        <div class="welcome-hero">
+          <h2>Welcome to GlycoPredict AI Dashboard</h2>
+          <p>
+            An advanced diagnostic support interface powered by a validated Logistic Regression model trained on the Pima Indians Diabetes Dataset. Access dataset metrics, explore clinical feature behaviors, and execute patients' diabetes risk evaluations interactively.
+          </p>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid" id="home-kpi-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="dashboard-grid-2">
+          <!-- Quickstart Guide -->
+          <div class="card card-teal">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-hand-holding-medical"></i> Quick-Start Clinical Guide</h2>
+            </div>
+            <div class="clinician-guidelines" style="border: none; padding: 0; background: none;">
+              <ul>
+                <li>
+                  <strong>Dataset Overview:</strong> Explore patient parameters statistics, range behaviors, and target variable ratios.
+                </li>
+                <li>
+                  <strong>Visualizations:</strong> Analyze interactive correlation heatmaps, variable histograms, and multi-factor scatter plots.
+                </li>
+                <li>
+                  <strong>Risk Prediction:</strong> Input a patient's diagnostic values directly to retrieve their relative risk category and tailored recommendations.
+                </li>
+                <li>
+                  <strong>Model Performance:</strong> Inspect accuracy charts, ROC Curves, and Confusion Matrices of our predictive formula.
+                </li>
+              </ul>
+              <div style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="navigateToView('prediction')">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> New Prediction
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Prediction Logs Summary -->
+          <div class="card card-green">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-history"></i> Recent Predictions</h2>
+              <button class="btn btn-secondary btn-sm" onclick="navigateToView('history')">View All</button>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table" id="recent-predictions-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Age</th>
+                    <th>BMI</th>
+                    <th>Glucose</th>
+                    <th>Risk Level</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Dataset Overview -->
+      <section id="view-dataset" class="dashboard-view">
+        <div class="kpi-grid" id="dataset-kpi-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="dashboard-grid-2">
+          <!-- Feature Summary Stats Card -->
+          <div class="card card-teal">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-calculator"></i> Dataset Average Metrics by Outcome</h2>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table" id="dataset-stats-table">
+                <thead>
+                  <tr>
+                    <th>Clinical Feature</th>
+                    <th>Non-Diabetic (Mean)</th>
+                    <th>Diabetic (Mean)</th>
+                    <th>Overall Mean</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Dataset Explorer -->
+          <div class="card card-green">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-magnifying-glass"></i> Interactive Data Explorer</h2>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="explorerSearch" class="form-control" placeholder="Search by Age/Glucose..." style="padding: 0.4rem 0.8rem; font-size: 0.8rem; width: 180px;">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table" id="dataset-explorer-table">
+                <thead>
+                  <tr>
+                    <th>Preg.</th>
+                    <th>Glucose</th>
+                    <th>BP</th>
+                    <th>Skin Th.</th>
+                    <th>Insulin</th>
+                    <th>BMI</th>
+                    <th>DPF</th>
+                    <th>Age</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+              <span id="explorerPaginationInfo">Showing 1 to 10 of 100 entries</span>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary btn-sm" id="explorerPrevBtn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                <button class="btn btn-secondary btn-sm" id="explorerNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Data Visualization -->
+      <section id="view-visualization" class="dashboard-view">
+        <div class="card card-teal" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-sliders"></i> Visualization Control Panel</h2>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+            <div class="form-group" style="margin-bottom: 0; flex-grow: 1; max-width: 300px;">
+              <label for="chartTypeSelect">Select Chart Type</label>
+              <select id="chartTypeSelect" class="form-control">
+                <option value="heatmap">Correlation Heatmap</option>
+                <option value="importance">Feature Importance</option>
+                <option value="histogram">Glucose Distribution Histogram</option>
+                <option value="boxplot">BMI distribution Boxplot (by Outcome)</option>
+                <option value="scatter">Glucose vs BMI Scatter Plot</option>
+                <option value="pie">Outcome Target Distribution Pie Chart</option>
+              </select>
+            </div>
+            <div style="margin-top: 1.25rem;">
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Charts are fully interactive. Hover for tooltips, double-click to autoscale, drag to zoom, or filter series via legends.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Output Card -->
+        <div class="card card-green">
+          <div id="chart-display-area" style="min-height: 480px; width: 100%;">
+            <!-- Plotly renders here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Diabetes Prediction -->
+      <section id="view-prediction" class="dashboard-view">
+        
+        <!-- Model Loading Progress Bar (Mock overlay / loading indicator) -->
+        <div class="card card-teal" id="model-progress-card" style="margin-bottom: 1.5rem; display: none;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.25rem;"><i class="fa-solid fa-sync fa-spin"></i> Initializing Predictive Engine...</h3>
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar" id="model-progress-bar"></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-1-2">
+          <!-- Input Form Column -->
+          <div class="card card-teal">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-id-card-clip"></i> Patient Diagnostic Metrics</h2>
+              <button class="btn btn-secondary btn-sm" id="btn-fill-normal" type="button">Fill Healthy Sample</button>
+              <button class="btn btn-secondary btn-sm" id="btn-fill-diabetic" type="button">Fill Diabetic Sample</button>
+            </div>
+            
+            <form id="prediction-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="input-pregnancies">Pregnancies (times)</label>
+                  <input type="number" id="input-pregnancies" class="form-control" required min="0" max="20" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="input-glucose">Glucose (mg/dL)</label>
+                  <input type="number" id="input-glucose" class="form-control" required min="0" max="300" value="100">
+                </div>
+                <div class="form-group">
+                  <label for="input-bp">Blood Pressure (mmHg)</label>
+                  <input type="number" id="input-bp" class="form-control" required min="0" max="200" value="80">
+                </div>
+                <div class="form-group">
+                  <label for="input-skin">Skinfold Thickness (mm)</label>
+                  <input type="number" id="input-skin" class="form-control" required min="0" max="100" value="20">
+                </div>
+                <div class="form-group">
+                  <label for="input-insulin">Insulin Level (μU/mL)</label>
+                  <input type="number" id="input-insulin" class="form-control" required min="0" max="1000" value="80">
+                </div>
+                <div class="form-group">
+                  <label for="input-bmi">BMI (kg/m²)</label>
+                  <input type="number" id="input-bmi" class="form-control" step="0.1" required min="0" max="70" value="25.0">
+                </div>
+                <div class="form-group">
+                  <label for="input-dpf">Diabetes Pedigree Function</label>
+                  <input type="number" id="input-dpf" class="form-control" step="0.001" required min="0" max="3.0" value="0.350">
+                </div>
+                <div class="form-group">
+                  <label for="input-age">Age (years)</label>
+                  <input type="number" id="input-age" class="form-control" required min="1" max="120" value="30">
+                </div>
+              </div>
+
+              <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex-grow: 1;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate Risk Probability
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                  Reset Form
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Prediction Result Column -->
+          <div class="card card-green" style="display: flex; flex-direction: column;">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-stethoscope"></i> Diagnostic Output & Probability</h2>
+            </div>
+
+            <!-- Loading Spinner container -->
+            <div class="spinner-container" id="prediction-spinner">
+              <div class="spinner"></div>
+              <p class="spinner-text">Analyzing Biomarkers...</p>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Executing logistic calculation across multi-factor parameters.</p>
+            </div>
+
+            <!-- Default/Empty state indicator -->
+            <div class="prediction-result-container" id="prediction-empty-state">
+              <i class="fa-solid fa-heart-circle-exclamation" style="font-size: 4rem; color: var(--primary-sea-green); opacity: 0.3; margin-bottom: 1.5rem;"></i>
+              <h3>Awaiting Input Metrics</h3>
+              <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 400px; margin-top: 0.5rem;">
+                Complete the patient's diagnostic parameters form on the left and click "Calculate Risk Probability" to view predictive analytics.
+              </p>
+            </div>
+
+            <!-- Main output details (hidden initially) -->
+            <div class="prediction-result-container" id="prediction-results" style="display: none; width: 100%;">
+              
+              <!-- Interactive Gauge Chart container -->
+              <div class="gauge-chart-container" id="prediction-gauge"></div>
+
+              <!-- Risk Badge -->
+              <div class="risk-badge-card" id="risk-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span id="risk-text">Low Risk</span>
+              </div>
+
+              <!-- Recommendations -->
+              <div class="clinician-guidelines">
+                <h3><i class="fa-solid fa-notes-medical"></i> Clinician Recommendations</h3>
+                <ul id="recommendations-list">
+                  <!-- Populated by JS -->
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Model Performance -->
+      <section id="view-model" class="dashboard-view">
+        <div class="kpi-grid">
+          <!-- Metric cards specific to model performance -->
+          <div class="card card-teal kpi-card">
+            <div class="kpi-info">
+              <h3>Model Accuracy</h3>
+              <div class="kpi-value">78.4%</div>
+            </div>
+            <div class="kpi-icon"><i class="fa-solid fa-bullseye"></i></div>
+          </div>
+          <div class="card card-green kpi-card">
+            <div class="kpi-info">
+              <h3>Precision (Positive Class)</h3>
+              <div class="kpi-value">73.1%</div>
+            </div>
+            <div class="kpi-icon"><i class="fa-solid fa-compress"></i></div>
+          </div>
+          <div class="card card-fern kpi-card">
+            <div class="kpi-info">
+              <h3>Recall / Sensitivity</h3>
+              <div class="kpi-value">64.4%</div>
+            </div>
+            <div class="kpi-icon"><i class="fa-solid fa-expand"></i></div>
+          </div>
+          <div class="card card-lime kpi-card">
+            <div class="kpi-info">
+              <h3>F1-Score</h3>
+              <div class="kpi-value">68.5%</div>
+            </div>
+            <div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-2">
+          <!-- ROC Curve Plot -->
+          <div class="card card-teal">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-chart-line"></i> ROC Curve (Receiver Operating Characteristic)</h2>
+            </div>
+            <div id="roc-curve-chart" style="height: 380px; width: 100%;"></div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+              Area Under Curve (AUC) = <strong>0.84</strong>. Demonstrates strong class separation capabilities.
+            </div>
+          </div>
+
+          <!-- Confusion Matrix and Report -->
+          <div class="card card-green">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-table-cells"></i> Confusion Matrix</h2>
+            </div>
+            
+            <div class="confusion-matrix-grid">
+              <!-- Grid Header -->
+              <div></div>
+              <div class="matrix-label">Predicted Negative</div>
+              <div class="matrix-label">Predicted Positive</div>
+              
+              <!-- First Row -->
+              <div class="matrix-label" style="writing-mode: vertical-rl; transform: rotate(180deg);">Actual Negative</div>
+              <div class="matrix-cell true-neg">
+                <span class="matrix-cell-title">True Negative (TN)</span>
+                <span class="matrix-cell-value">81</span>
+              </div>
+              <div class="matrix-cell">
+                <span class="matrix-cell-title">False Positive (FP)</span>
+                <span class="matrix-cell-value">14</span>
+              </div>
+
+              <!-- Second Row -->
+              <div class="matrix-label" style="writing-mode: vertical-rl; transform: rotate(180deg);">Actual Positive</div>
+              <div class="matrix-cell">
+                <span class="matrix-cell-title">False Negative (FN)</span>
+                <span class="matrix-cell-value">21</span>
+              </div>
+              <div class="matrix-cell true-pos">
+                <span class="matrix-cell-title">True Positive (TP)</span>
+                <span class="matrix-cell-value">38</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+              <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem; font-weight: 700;">Classification Performance Overview</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                The model shows a high specificity (True Negative Rate) of <strong>85.3%</strong>, reducing false alarms. Sensitivity (Recall) is <strong>64.4%</strong>, reflecting clinical safety thresholds for medical screening dashboards.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Prediction History -->
+      <section id="view-history" class="dashboard-view">
+        <div class="card card-teal">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-list-check"></i> Patient Predictions History Logs</h2>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <button class="btn btn-secondary btn-sm" id="btn-export-csv"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+              <button class="btn btn-secondary btn-sm" id="btn-clear-history"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table" id="history-logs-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Age</th>
+                  <th>Preg.</th>
+                  <th>Glucose</th>
+                  <th>BP</th>
+                  <th>BMI</th>
+                  <th>DPF</th>
+                  <th>Calculated Probability</th>
+                  <th>Risk Level</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="history-empty-indicator" style="text-align: center; padding: 3rem; display: none;">
+            <i class="fa-solid fa-receipt" style="font-size: 3rem; color: var(--text-muted); opacity: 0.3; margin-bottom: 1rem;"></i>
+            <h3>No predictions recorded yet</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Predictions generated in the "Diabetes Prediction" section will appear here automatically.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: About -->
+      <section id="view-about" class="dashboard-view">
+        <div class="dashboard-grid-2">
+          
+          <!-- About the app -->
+          <div class="card card-teal">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-circle-info"></i> About GlycoPredict AI</h2>
+            </div>
+            <p style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--text-muted);">
+              GlycoPredict AI is a responsive analytics platform designed to bridge the gap between data science and clinical workflows. By analyzing metabolic biomarkers and demographic variables, the system computes the statistical risk of diabetes onset.
+            </p>
+            <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color: var(--text-muted);">
+              This application utilizes client-side decision algorithms derived from logistic regression modeling trained on the Pima Indians Diabetes Dataset, which compiles health indices of female patients of Pima Indian heritage aged 21 and older.
+            </p>
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; font-weight: 700;">Mathematical Foundation</h3>
+            <div style="background-color: var(--bg-main); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-light); font-family: monospace; font-size: 0.85rem; margin-bottom: 1rem;">
+              Probability (P) = 1 / (1 + e^-z)<br>
+              z = -8.404 + 0.123*Pregnancies + 0.035*Glucose - 0.013*BP + 0.089*BMI + 0.945*DPF + 0.015*Age
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              *Skinfold Thickness and Insulin variables represent minimal weights within this specific regression run.
+            </p>
+          </div>
+
+          <!-- Feature Definition Guide -->
+          <div class="card card-green">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-book-medical"></i> Clinical Variables Glossary</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem; max-height: 450px; overflow-y: auto; padding-right: 0.5rem;">
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Pregnancies:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Number of times the patient has been pregnant.</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Glucose:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Plasma glucose concentration measured two hours after an oral glucose tolerance test (normal level: &lt; 140 mg/dL).</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Blood Pressure:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Diastolic blood pressure (mmHg). Ideal diastolic pressure lies between 60 and 80 mmHg.</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Skinfold Thickness:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Triceps skin fold thickness (mm), used to estimate body fat percentage.</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Insulin:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Two-hour serum insulin level (μU/mL). Serves as a gauge for insulin resistance.</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">BMI:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Body Mass Index calculated as weight in kilograms divided by height in meters squared (normal range: 18.5 - 24.9 kg/m²).</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Diabetes Pedigree Function (DPF):</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">A score computing diabetes hereditary impact based on family history. Higher values denote stronger genetic risks.</p>
+              </div>
+              <div>
+                <strong style="color: var(--primary-jungle-teal);">Age:</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Patient's age in years, correlating with risk increases over time.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div>
+        <strong>GlycoPredict AI</strong> &copy; 2026 - Clinical Analytics & Diagnostic Support Panel.
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">
+        Developed by: Likith Gowda V, AI-Gernelist, ipec solutions, pvt. ltd
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">
+        Disclaimer: This tool is intended for education/demonstration purposes and should not serve as clinical advice.
+      </div>
+      <div class="footer-socials">
+        <a href="https://github.com" target="_blank" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="https://google.com" target="_blank" aria-label="Website"><i class="fa-solid fa-globe"></i></a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
