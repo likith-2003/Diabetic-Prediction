@@ -87,7 +87,6 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    port = 5000
     print("==================================================")
     print("   GlycoPredict AI - Flask Python API Backend")
     print("==================================================")
@@ -95,4 +94,5 @@ if __name__ == '__main__':
     print(f"Web Dashboard: http://localhost:{port}/")
     print(f"API Endpoint:  http://localhost:{port}/api/predict")
     print("--------------------------------------------------")
-    app.run(host='0.0.0.0', port=port, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)
