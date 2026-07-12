@@ -3,6 +3,8 @@ import os
 import math
 
 app = Flask(__name__, static_folder='.')
+port = int(os.environ.get("PORT", 5000))
+print(f"Starting server on port: {port}")
 
 # Logistic regression coefficients matching JS calculations
 MODEL_COEFFICIENTS = {
@@ -95,4 +97,4 @@ if __name__ == '__main__':
     print(f"API Endpoint:  http://localhost:{port}/api/predict")
     print("--------------------------------------------------")
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
